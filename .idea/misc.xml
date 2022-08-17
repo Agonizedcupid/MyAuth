@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Android/Practice/MyAuth/app/src/main/res/drawable/edit_text_background.xml" value="0.2095" />
         <entry key="..\:/Android/Practice/MyAuth/app/src/main/res/layout/activity_log_in.xml" value="0.358695652173913" />
         <entry key="..\:/Android/Practice/MyAuth/app/src/main/res/layout/activity_main.xml" value="0.358695652173913" />
       </map>
