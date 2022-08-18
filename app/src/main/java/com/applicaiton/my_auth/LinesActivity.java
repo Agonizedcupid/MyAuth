@@ -21,6 +21,7 @@ import com.applicaiton.my_auth.Networking.Networking;
 import com.google.android.material.button.MaterialButton;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -105,8 +106,10 @@ public class LinesActivity extends AppCompatActivity implements ClickOperationIn
 
 
         QueueModel mod = new QueueModel(model.getIntAuthLineId(), type, builder.toString());
+        List<QueueModel> listToBePosted = new ArrayList<>();
+        listToBePosted.add(mod);
         if (Constant.isInternetConnected(this)) {
-            new Networking().postDirectToServer(mod,0, databaseAdapter);
+            new Networking().postDirectToServer(listToBePosted, databaseAdapter);
             List<LineModel> list = databaseAdapter.getLinesByHeaderId(headerId);
             adapter = new LinesAdapter(LinesActivity.this, list, this);
             recyclerView.setAdapter(adapter);

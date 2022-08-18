@@ -257,16 +257,15 @@ public class Networking {
 
     private CompositeDisposable postDisposable = new CompositeDisposable();
 
-    public void postDirectToServer(QueueModel model, int from, DatabaseAdapter databaseAdapter) {
-        if (from == 0) {
-            List<QueueModel> list = new ArrayList<>();
-            list.add(model);
-            postDisposable.add(apis.postQueue(list)
-                    .subscribeOn(Schedulers.io())
-                    .subscribe(new Consumer<ResponseBody>() {
-                        @Override
-                        public void accept(ResponseBody responseBody) throws Throwable {
-                            Log.d("POST_RESPONSE", "accept: " + responseBody.string());
+    public void postDirectToServer(List<QueueModel> list, DatabaseAdapter databaseAdapter) {
+
+        postDisposable.add(apis.postQueue(list)
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Consumer<ResponseBody>() {
+                    @Override
+                    public void accept(ResponseBody responseBody) throws Throwable {
+                        Log.d("POST_RESPONSE", "accept: " + responseBody.string());
+                        for (QueueModel model : list) {
                             long id = databaseAdapter.deleteLines(model.getIntAuthLineId());
                             if (id > 0) {
                                 Log.d("POST_RESPONSE", "accept: Posted successfully!");
@@ -274,16 +273,15 @@ public class Networking {
                                 Log.d("POST_RESPONSE", "accept: Unable to post!");
                             }
                         }
-                    }, new Consumer<Throwable>() {
-                        @Override
-                        public void accept(Throwable throwable) throws Throwable {
-                            Log.d("POST_RESPONSE", "Exception: " + throwable.getMessage());
-                        }
-                    }));
 
-        } else { // this is from service later
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Throwable {
+                        Log.d("POST_RESPONSE", "Exception: " + throwable.getMessage());
+                    }
+                }));
 
-        }
 
     }
 
