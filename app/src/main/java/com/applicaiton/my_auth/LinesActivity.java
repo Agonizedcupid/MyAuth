@@ -4,6 +4,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -80,14 +83,50 @@ public class LinesActivity extends AppCompatActivity implements ClickOperationIn
         rejectBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                postRejectedData();
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(LinesActivity.this);
+                builder.setTitle("You are about to reject all")
+                        .setMessage("Are you sure")
+                        .setCancelable(false)
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                postRejectedData();
+                                dialog.dismiss();
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int i) {
+                                dialog.dismiss();
+                            }
+                        });
+                AlertDialog alert = builder.create();
+                alert.show();
+
+
             }
         });
 
         authorizeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                postAuthorizedData();
+                AlertDialog.Builder builder = new AlertDialog.Builder(LinesActivity.this);
+                builder.setTitle("You are about to Authorize all")
+                        .setMessage("Are you sure")
+                        .setCancelable(false)
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                postAuthorizedData();
+                                dialog.dismiss();
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int i) {
+                                dialog.dismiss();
+                            }
+                        });
+                AlertDialog alert = builder.create();
+                alert.show();
+
             }
         });
     }

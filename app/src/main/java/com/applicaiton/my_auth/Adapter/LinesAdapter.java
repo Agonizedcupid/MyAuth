@@ -1,6 +1,8 @@
 package com.applicaiton.my_auth.Adapter;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.applicaiton.my_auth.Interface.ClickOperationInterface;
 import com.applicaiton.my_auth.Interface.LineInterface;
+import com.applicaiton.my_auth.LinesActivity;
 import com.applicaiton.my_auth.Model.LineModel;
 import com.applicaiton.my_auth.R;
 import com.google.android.material.button.MaterialButton;
@@ -52,13 +55,50 @@ public class LinesAdapter extends RecyclerView.Adapter<LinesAdapter.ViewHolder> 
         holder.rejectBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                clickOperationInterface.onClick(0, model);
+
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle("You are about to reject the request")
+                        .setMessage("Are you sure")
+                        .setCancelable(false)
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                clickOperationInterface.onClick(0, model);
+                                dialog.dismiss();
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int i) {
+                                dialog.dismiss();
+                            }
+                        });
+                AlertDialog alert = builder.create();
+                alert.show();
+
+
             }
         });
         holder.authorizeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                clickOperationInterface.onClick(1, model);
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle("Are you sure you want to Authorize")
+                        .setMessage("")
+                        .setCancelable(false)
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                clickOperationInterface.onClick(1, model);
+                                dialog.dismiss();
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int i) {
+                                dialog.dismiss();
+                            }
+                        });
+                AlertDialog alert = builder.create();
+                alert.show();
+
             }
         });
     }
