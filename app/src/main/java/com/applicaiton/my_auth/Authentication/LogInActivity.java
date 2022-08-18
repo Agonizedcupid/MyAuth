@@ -1,7 +1,9 @@
 package com.applicaiton.my_auth.Authentication;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -15,6 +17,7 @@ import com.applicaiton.my_auth.MainActivity;
 import com.applicaiton.my_auth.Model.LogInModel;
 import com.applicaiton.my_auth.Networking.Networking;
 import com.applicaiton.my_auth.R;
+import com.applicaiton.my_auth.Service.PostService;
 import com.google.android.material.button.MaterialButton;
 
 public class LogInActivity extends AppCompatActivity {
@@ -30,6 +33,15 @@ public class LogInActivity extends AppCompatActivity {
         setContentView(R.layout.activity_log_in);
 
         initUI();
+    }
+
+    @Override
+    protected void onResume() {
+        if (!PostService.isServiceRunning) {
+            ContextCompat.startForegroundService(this, new Intent(this, PostService.class));
+        }
+
+        super.onResume();
     }
 
     private void initUI() {

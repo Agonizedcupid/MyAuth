@@ -132,6 +132,27 @@ public class DatabaseAdapter {
         return list;
     }
 
+    public List<QueueModel> getQueue() {
+        List<QueueModel> list = new ArrayList<>();
+        SQLiteDatabase database = helper.getWritableDatabase();
+
+        String[] columns = {DatabaseHelper.UID, DatabaseHelper.intAuthLineId,
+                DatabaseHelper.IsAuthorized,
+                DatabaseHelper.Instructions
+        };
+
+        Cursor cursor = database.query(DatabaseHelper.QUEUE_TABLE_NAME, columns, null, null, null, null, null);
+        while (cursor.moveToNext()) {
+            QueueModel model = new QueueModel(
+                    cursor.getString(1),
+                    cursor.getInt(2),
+                    cursor.getString(3)
+            );
+            list.add(model);
+        }
+        return list;
+    }
+
     public List<LineModel> getLinesByHeaderId(String headerId) {
 
         SQLiteDatabase database = helper.getWritableDatabase();
@@ -174,6 +195,17 @@ public class DatabaseAdapter {
 
         String[] args = {"" + id};
         long ids = database.delete(DatabaseHelper.LINES_TABLE_NAME, selection, args);
+
+        return ids;
+    }
+
+    public long deleteQueues(String id) {
+        SQLiteDatabase database = helper.getWritableDatabase();
+        //select * from table_name where id = id
+        String selection = DatabaseHelper.intAuthLineId + " LIKE ?";
+
+        String[] args = {"" + id};
+        long ids = database.delete(DatabaseHelper.QUEUE_TABLE_NAME, selection, args);
 
         return ids;
     }
@@ -329,7 +361,7 @@ public class DatabaseAdapter {
         private Context context;
 
         private static final String DATABASE_NAME = "my_auth.db";
-        private static final int VERSION_NUMBER = 10;
+        private static final int VERSION_NUMBER = 15;
 
         //Header Table:
         private static final String HEADERS_TABLE_NAME = "headers";

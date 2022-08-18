@@ -266,11 +266,12 @@ public class Networking {
                     public void accept(ResponseBody responseBody) throws Throwable {
                         Log.d("POST_RESPONSE", "accept: " + responseBody.string());
                         for (QueueModel model : list) {
-                            long id = databaseAdapter.deleteLines(model.getIntAuthLineId());
+                            long id = databaseAdapter.deleteQueues(model.getIntAuthLineId());
+                            //long id = databaseAdapter.deleteLines(model.getIntAuthLineId());
                             if (id > 0) {
-                                Log.d("POST_RESPONSE", "accept: Posted successfully!");
+                                Log.d("POST_RESPONSE", "accept: Posted successfully! " + model.getIntAuthLineId());
                             } else {
-                                Log.d("POST_RESPONSE", "accept: Unable to post!");
+                                Log.d("POST_RESPONSE", "accept: Unable to post! "+ model.getIntAuthLineId());
                             }
                         }
 

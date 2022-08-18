@@ -5,6 +5,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -38,6 +39,8 @@ public class LinesActivity extends AppCompatActivity implements ClickOperationIn
     //private String messageId = "";
     private int groupId = -777;
     LinesAdapter adapter;
+
+    private static List<LineModel> listOfData = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +76,48 @@ public class LinesActivity extends AppCompatActivity implements ClickOperationIn
                 onBackPressed();
             }
         });
+
+        rejectBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                postRejectedData();
+            }
+        });
+
+        authorizeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                postAuthorizedData();
+            }
+        });
+    }
+
+    private void postRejectedData() {
+        List<QueueModel> listToBePosted = new ArrayList<>();
+        if (listOfData != null) {
+            StringBuilder builder = new StringBuilder();
+            for (LineModel model : listOfData) {
+                builder.append(model.getIntAuthLineId()).append("|").append(0).append("|").append(groupId)
+                        .append("|").append(currentDate()).append("|");
+                QueueModel mod = new QueueModel(model.getIntAuthLineId(), 0, builder.toString());
+                listToBePosted.add(mod);
+            }
+            doThePost(listToBePosted);
+        }
+    }
+
+    private void postAuthorizedData() {
+        List<QueueModel> listToBePosted = new ArrayList<>();
+        if (listOfData != null) {
+            StringBuilder builder = new StringBuilder();
+            for (LineModel model : listOfData) {
+                builder.append(model.getIntAuthLineId()).append("|").append(1).append("|").append(groupId)
+                        .append("|").append(currentDate()).append("|");
+                QueueModel mod = new QueueModel(model.getIntAuthLineId(), 1, builder.toString());
+                listToBePosted.add(mod);
+            }
+            doThePost(listToBePosted);
+        }
     }
 
     @Override
@@ -86,6 +131,8 @@ public class LinesActivity extends AppCompatActivity implements ClickOperationIn
         new Networking().getLines(databaseAdapter, new LineInterface() {
             @Override
             public void gotLines(List<LineModel> list) {
+                listOfData.clear();
+                listOfData = list;
                 adapter = new LinesAdapter(LinesActivity.this, list, clickOperationInterface);
                 recyclerView.setAdapter(adapter);
                 adapter.notifyDataSetChanged();
@@ -98,6 +145,53 @@ public class LinesActivity extends AppCompatActivity implements ClickOperationIn
         }, headerId);
     }
 
+    private void doThePost(List<QueueModel> listToBePosted) {
+        if (Constant.isInternetConnected(this)) {
+            new Networking().postDirectToServer(listToBePosted, databaseAdapter);
+            //List<LineModel> list = databaseAdapter.getLinesByHeaderId(headerId);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    loadDataFromLocal(headerId);
+                }
+            },1000);
+//            adapter = new LinesAdapter(LinesActivity.this, list, this);
+//            recyclerView.setAdapter(adapter);
+//            adapter.notifyDataSetChanged();
+//
+//            listOfData.clear();
+//            listOfData = list;
+        } else {
+            for (QueueModel mod : listToBePosted) {
+                String feedback = new Networking().insertQueue(databaseAdapter, mod);
+                if (!feedback.equals("-777")) {
+                    long id = databaseAdapter.deleteLines(feedback);
+                    if (id > 0) {
+                        Toast.makeText(this, "Added Queue!", Toast.LENGTH_SHORT).show();
+//                        List<LineModel> list = databaseAdapter.getLinesByHeaderId(headerId);
+//                        adapter = new LinesAdapter(LinesActivity.this, list, this);
+//                        recyclerView.setAdapter(adapter);
+//                        adapter.notifyDataSetChanged();
+//
+//                        listOfData.clear();
+//                        listOfData = list;
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                loadDataFromLocal(headerId);
+                            }
+                        },1000);
+                    } else {
+                        Toast.makeText(this, "Failed to add on Queue!", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(this, "Unable to post", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+        }
+    }
+
     @Override
     public void onClick(int type, LineModel model) {
         StringBuilder builder = new StringBuilder();
@@ -108,33 +202,11 @@ public class LinesActivity extends AppCompatActivity implements ClickOperationIn
         QueueModel mod = new QueueModel(model.getIntAuthLineId(), type, builder.toString());
         List<QueueModel> listToBePosted = new ArrayList<>();
         listToBePosted.add(mod);
-        if (Constant.isInternetConnected(this)) {
-            new Networking().postDirectToServer(listToBePosted, databaseAdapter);
-            List<LineModel> list = databaseAdapter.getLinesByHeaderId(headerId);
-            adapter = new LinesAdapter(LinesActivity.this, list, this);
-            recyclerView.setAdapter(adapter);
-            adapter.notifyDataSetChanged();
-        } else {
-            String feedback = new Networking().insertQueue(databaseAdapter, mod);
-            if (!feedback.equals("-777")) {
-                long id = databaseAdapter.deleteLines(feedback);
-                if (id > 0) {
-                    Toast.makeText(this, "Added Queue!", Toast.LENGTH_SHORT).show();
-                    List<LineModel> list = databaseAdapter.getLinesByHeaderId(headerId);
-                    adapter = new LinesAdapter(LinesActivity.this, list, this);
-                    recyclerView.setAdapter(adapter);
-                    adapter.notifyDataSetChanged();
-                } else {
-                    Toast.makeText(this, "Failed to add on Queue!", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                Toast.makeText(this, "Unable to post", Toast.LENGTH_SHORT).show();
-            }
-        }
+        doThePost(listToBePosted);
     }
 
     private String currentDate() {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = new Date();
         return formatter.format(date);
     }
