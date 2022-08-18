@@ -11,13 +11,14 @@ import androidx.annotation.Nullable;
 
 import com.applicaiton.my_auth.Model.HeaderModel;
 import com.applicaiton.my_auth.Model.LineModel;
+import com.applicaiton.my_auth.Model.QueueModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseAdapter {
 
-
+    List<LineModel> linesList = new ArrayList<>();
     DatabaseHelper helper;
 
     public DatabaseAdapter(Context context) {
@@ -55,6 +56,18 @@ public class DatabaseAdapter {
         contentValues.put(DatabaseHelper.intHeaderID, model.getIntHeaderID());
 
         long id = database.insert(DatabaseHelper.LINES_TABLE_NAME, null, contentValues);
+        return id;
+    }
+
+    public long insertQueue(QueueModel model) {
+        SQLiteDatabase database = helper.getWritableDatabase();
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DatabaseHelper.intAuthLineId, model.getIntAuthLineId());
+        contentValues.put(DatabaseHelper.IsAuthorized, model.getIsAuthorized());
+        contentValues.put(DatabaseHelper.Instructions, model.getInstructions());
+
+        long id = database.insert(DatabaseHelper.QUEUE_TABLE_NAME, null, contentValues);
         return id;
     }
 
@@ -117,6 +130,52 @@ public class DatabaseAdapter {
             list.add(model);
         }
         return list;
+    }
+
+    public List<LineModel> getLinesByHeaderId(String headerId) {
+
+        SQLiteDatabase database = helper.getWritableDatabase();
+
+
+        String selection = DatabaseHelper.intHeaderID + "=?";
+
+
+        String[] args = {"" + headerId};
+
+        String[] columns = {DatabaseHelper.UID, DatabaseHelper.intAuthLineId,
+                DatabaseHelper.strLineMessage1,
+                DatabaseHelper.strLineMessage2,
+                DatabaseHelper.strLineMessage3,
+                DatabaseHelper.blnIsApproved,
+                DatabaseHelper.intHeaderID
+
+        };
+        Cursor cursor = database.query(DatabaseHelper.LINES_TABLE_NAME, columns, selection, args, null, null, null);
+        linesList.clear();
+        while (cursor.moveToNext()) {
+            LineModel model = new LineModel(
+                    cursor.getString(1),
+                    cursor.getString(2),
+                    cursor.getString(3),
+                    cursor.getString(4),
+                    cursor.getString(5),
+                    cursor.getString(6)
+            );
+            linesList.add(model);
+        }
+        return linesList;
+
+    }
+
+    public long deleteLines(String id) {
+        SQLiteDatabase database = helper.getWritableDatabase();
+        //select * from table_name where id = id
+        String selection = DatabaseHelper.intAuthLineId + " LIKE ?";
+
+        String[] args = {"" + id};
+        long ids = database.delete(DatabaseHelper.LINES_TABLE_NAME, selection, args);
+
+        return ids;
     }
 
     //get HEADER by User Name , date, route Name, order types, user id
@@ -315,6 +374,17 @@ public class DatabaseAdapter {
                 + intHeaderID + " VARCHAR(255));";
         private static final String DROP_LINES_TABLE = "DROP TABLE IF EXISTS " + LINES_TABLE_NAME;
 
+        private static final String QUEUE_TABLE_NAME = "queue";
+        private static final String IsAuthorized = "IsAuthorized";
+        private static final String Instructions = "strLineMessage1";
+        //Creating the table:
+        private static final String CREATE_QUEUE_TABLE = "CREATE TABLE " + QUEUE_TABLE_NAME
+                + " (" + UID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + intAuthLineId + " VARCHAR(255),"
+                + IsAuthorized + " INTEGER,"
+                + Instructions + " VARCHAR(255));";
+        private static final String DROP_QUEUE_TABLE = "DROP TABLE IF EXISTS " + QUEUE_TABLE_NAME;
+
 
         public DatabaseHelper(@Nullable Context context) {
             super(context, DATABASE_NAME, null, VERSION_NUMBER);
@@ -327,6 +397,7 @@ public class DatabaseAdapter {
             try {
                 db.execSQL(CREATE_HEADER_TABLE);
                 db.execSQL(CREATE_LINE_TABLE);
+                db.execSQL(CREATE_QUEUE_TABLE);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -338,6 +409,7 @@ public class DatabaseAdapter {
             try {
                 db.execSQL(DROP_HEADER_TABLE);
                 db.execSQL(DROP_LINES_TABLE);
+                db.execSQL(DROP_QUEUE_TABLE);
                 onCreate(db);
             } catch (Exception e) {
                 e.printStackTrace();

@@ -1,6 +1,7 @@
 package com.applicaiton.my_auth.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.applicaiton.my_auth.LinesActivity;
 import com.applicaiton.my_auth.Model.HeaderModel;
 import com.applicaiton.my_auth.R;
 
@@ -40,6 +42,17 @@ public class HeaderAdapter extends RecyclerView.Adapter<HeaderAdapter.ViewHolder
             holder.message.setText(String.valueOf(model.getStrMessage()));
             holder.userName.setText(String.valueOf("From: "+model.getStrUserName()));
             holder.date.setText(String.valueOf("Date sent: "+model.getDate()));
+
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(context, LinesActivity.class);
+                    intent.putExtra("headerId", model.getIntHeaderID());
+                    intent.putExtra("msg", model.getStrMessage());
+                    intent.putExtra("groupId", model.getGroupID());
+                    context.startActivity(intent);
+                }
+            });
 
         }catch (Exception e) {
             Log.d("HEADER_ADAPTER", "onBindViewHolder: "+e.getMessage());

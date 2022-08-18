@@ -10,6 +10,7 @@ import com.applicaiton.my_auth.Interface.LogInInterface;
 import com.applicaiton.my_auth.Model.HeaderModel;
 import com.applicaiton.my_auth.Model.LineModel;
 import com.applicaiton.my_auth.Model.LogInModel;
+import com.applicaiton.my_auth.Model.QueueModel;
 import com.applicaiton.my_auth.Networking.Client.RetrofitClient;
 import com.google.gson.JsonArray;
 
@@ -81,7 +82,7 @@ public class Networking {
         List<LineModel> listOfLines = new ArrayList<>();
         headerDisposable.add(apis.getPendingAuth()
                 .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<ResponseBody>() {
                     @Override
                     public void accept(ResponseBody responseBody) throws Throwable {
@@ -234,12 +235,56 @@ public class Networking {
         observable.subscribe(observer);
     }
 
-    public void getLines(DatabaseAdapter databaseAdapter, LineInterface lineInterface) {
+    public void getLines(DatabaseAdapter databaseAdapter, LineInterface lineInterface, String headerId) {
+        List<LineModel> list = new ArrayList<>();
         if (databaseAdapter.getHeaders().size() <= 0) {
             lineInterface.error("No Lines found!");
         } else {
-            lineInterface.gotLines(databaseAdapter.getLines());
+            list.clear();
+            list = databaseAdapter.getLinesByHeaderId(headerId);
+            lineInterface.gotLines(list);
         }
+    }
+
+    public String insertQueue(DatabaseAdapter databaseAdapter, QueueModel model) {
+        long id = databaseAdapter.insertQueue(model);
+        if (id > 0) {
+            return model.getIntAuthLineId();
+        } else {
+            return "-777";
+        }
+    }
+
+    private CompositeDisposable postDisposable = new CompositeDisposable();
+
+    public void postDirectToServer(QueueModel model, int from, DatabaseAdapter databaseAdapter) {
+        if (from == 0) {
+            List<QueueModel> list = new ArrayList<>();
+            list.add(model);
+            postDisposable.add(apis.postQueue(list)
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(new Consumer<ResponseBody>() {
+                        @Override
+                        public void accept(ResponseBody responseBody) throws Throwable {
+                            Log.d("POST_RESPONSE", "accept: " + responseBody.string());
+                            long id = databaseAdapter.deleteLines(model.getIntAuthLineId());
+                            if (id > 0) {
+                                Log.d("POST_RESPONSE", "accept: Posted successfully!");
+                            } else {
+                                Log.d("POST_RESPONSE", "accept: Unable to post!");
+                            }
+                        }
+                    }, new Consumer<Throwable>() {
+                        @Override
+                        public void accept(Throwable throwable) throws Throwable {
+                            Log.d("POST_RESPONSE", "Exception: " + throwable.getMessage());
+                        }
+                    }));
+
+        } else { // this is from service later
+
+        }
+
     }
 
 }
