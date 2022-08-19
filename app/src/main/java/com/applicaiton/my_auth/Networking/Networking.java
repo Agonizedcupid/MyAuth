@@ -240,8 +240,8 @@ public class Networking {
         if (databaseAdapter.getHeaders().size() <= 0) {
             lineInterface.error("No Lines found!");
         } else {
-            list.clear();
             list = databaseAdapter.getLinesByHeaderId(headerId);
+            Log.d("LINE_TESTING", "Check: " + list.size());
             lineInterface.gotLines(list);
         }
     }
@@ -267,11 +267,12 @@ public class Networking {
                         Log.d("POST_RESPONSE", "accept: " + responseBody.string());
                         for (QueueModel model : list) {
                             long id = databaseAdapter.deleteQueues(model.getIntAuthLineId());
+                            long ids = databaseAdapter.deleteLines(model.getIntAuthLineId());
                             //long id = databaseAdapter.deleteLines(model.getIntAuthLineId());
-                            if (id > 0) {
+                            if (id > 0 || ids > 0) {
                                 Log.d("POST_RESPONSE", "accept: Posted successfully! " + model.getIntAuthLineId());
                             } else {
-                                Log.d("POST_RESPONSE", "accept: Unable to post! "+ model.getIntAuthLineId());
+                                Log.d("POST_RESPONSE", "accept: Unable to post! " + model.getIntAuthLineId());
                             }
                         }
 

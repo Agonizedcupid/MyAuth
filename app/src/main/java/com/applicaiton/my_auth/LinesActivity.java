@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -44,6 +45,8 @@ public class LinesActivity extends AppCompatActivity implements ClickOperationIn
     LinesAdapter adapter;
 
     private static List<LineModel> listOfData = new ArrayList<>();
+
+    private Networking networking = new Networking();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -167,11 +170,12 @@ public class LinesActivity extends AppCompatActivity implements ClickOperationIn
 
     private void loadDataFromLocal(String headerId) {
         ClickOperationInterface clickOperationInterface = this;
-        new Networking().getLines(databaseAdapter, new LineInterface() {
+        networking.getLines(databaseAdapter, new LineInterface() {
             @Override
             public void gotLines(List<LineModel> list) {
                 listOfData.clear();
                 listOfData = list;
+                Log.d("LINE_TESTING", ""+list.size());
                 adapter = new LinesAdapter(LinesActivity.this, list, clickOperationInterface);
                 recyclerView.setAdapter(adapter);
                 adapter.notifyDataSetChanged();
@@ -185,15 +189,18 @@ public class LinesActivity extends AppCompatActivity implements ClickOperationIn
     }
 
     private void doThePost(List<QueueModel> listToBePosted) {
+        ClickOperationInterface clickOperationInterface = this;
         if (Constant.isInternetConnected(this)) {
             new Networking().postDirectToServer(listToBePosted, databaseAdapter);
             //List<LineModel> list = databaseAdapter.getLinesByHeaderId(headerId);
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    loadDataFromLocal(headerId);
+                    adapter = new LinesAdapter(LinesActivity.this, databaseAdapter.getLinesByHeaderId(headerId), clickOperationInterface);
+                    recyclerView.setAdapter(adapter);
+                    adapter.notifyDataSetChanged();
                 }
-            },1000);
+            },2000);
 //            adapter = new LinesAdapter(LinesActivity.this, list, this);
 //            recyclerView.setAdapter(adapter);
 //            adapter.notifyDataSetChanged();
@@ -217,9 +224,12 @@ public class LinesActivity extends AppCompatActivity implements ClickOperationIn
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                loadDataFromLocal(headerId);
+                                //loadDataFromLocal(headerId);
+                                adapter = new LinesAdapter(LinesActivity.this, databaseAdapter.getLinesByHeaderId(headerId), clickOperationInterface);
+                                recyclerView.setAdapter(adapter);
+                                adapter.notifyDataSetChanged();
                             }
-                        },1000);
+                        },2000);
                     } else {
                         Toast.makeText(this, "Failed to add on Queue!", Toast.LENGTH_SHORT).show();
                     }

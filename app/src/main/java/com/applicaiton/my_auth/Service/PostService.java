@@ -85,9 +85,9 @@ public class PostService extends Service {
                 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 //this is the notification title:
-                .setContentTitle("Service is Running")
+                .setContentTitle(getResources().getString(R.string.app_name))
                 //Notification sub-title:
-                .setContentText("Activity Tracking!")
+                .setContentText("Posting Queues!")
                 //notification icon:
                 .setSmallIcon(R.mipmap.ic_launcher)
                 //setting the pending intent on the notification:

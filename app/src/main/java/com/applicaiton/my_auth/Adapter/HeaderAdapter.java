@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.applicaiton.my_auth.LinesActivity;
+import com.applicaiton.my_auth.MainActivity;
 import com.applicaiton.my_auth.Model.HeaderModel;
 import com.applicaiton.my_auth.R;
 
@@ -46,6 +47,7 @@ public class HeaderAdapter extends RecyclerView.Adapter<HeaderAdapter.ViewHolder
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    MainActivity.position = position;
                     Intent intent = new Intent(context, LinesActivity.class);
                     intent.putExtra("headerId", model.getIntHeaderID());
                     intent.putExtra("msg", model.getStrMessage());

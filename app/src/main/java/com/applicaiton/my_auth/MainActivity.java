@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -25,6 +26,8 @@ public class MainActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
 
+    public static int position = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,15 +36,24 @@ public class MainActivity extends AppCompatActivity {
         databaseAdapter = new DatabaseAdapter(this);
 
         initUI();
+
+        findViewById(R.id.q).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, QueueActivity.class));
+            }
+        });
     }
 
     private void initUI() {
         recyclerView = findViewById(R.id.headerListView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
     }
 
     @Override
     protected void onResume() {
+        recyclerView.scrollToPosition(position);
         headerViewModel = new ViewModelProvider(this).get(HeaderViewModel.class);
         headerViewModel.init(databaseAdapter);
         headerViewModel.getHeaders().observe(this, new Observer<ResponseHandler<List<HeaderModel>>>() {
@@ -50,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
                 switch (listResponseHandler.status) {
                     case ERROR:
                         recyclerView.setVisibility(View.GONE);
-                        Toast.makeText(MainActivity.this, ""+listResponseHandler.errorMessage, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "" + listResponseHandler.errorMessage, Toast.LENGTH_SHORT).show();
                         break;
                     case SUCCESS:
                         recyclerView.setVisibility(View.VISIBLE);

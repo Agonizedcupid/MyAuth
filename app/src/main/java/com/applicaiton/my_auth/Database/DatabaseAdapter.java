@@ -184,6 +184,7 @@ public class DatabaseAdapter {
             );
             linesList.add(model);
         }
+        Log.d("LINE_TESTING", "HAHA: "+linesList.size());
         return linesList;
 
     }
@@ -361,7 +362,7 @@ public class DatabaseAdapter {
         private Context context;
 
         private static final String DATABASE_NAME = "my_auth.db";
-        private static final int VERSION_NUMBER = 15;
+        private static final int VERSION_NUMBER = 25;
 
         //Header Table:
         private static final String HEADERS_TABLE_NAME = "headers";
